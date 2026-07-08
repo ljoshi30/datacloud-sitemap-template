@@ -3,6 +3,9 @@
 Version control, review, validation, and **drift detection** for the Data Cloud
 Web SDK sitemap (`sitemap.js`).
 
+> **Setting this up for a new project?** See **[SETUP.md](SETUP.md)** for the
+> step-by-step checklist.
+
 ## Why this exists
 
 The Data Cloud website connector stores the Web SDK sitemap only in its UI. There
