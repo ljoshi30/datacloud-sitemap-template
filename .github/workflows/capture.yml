@@ -28,17 +28,39 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
+
+      # Fail loudly and clearly if the CDN URL secret is missing/misnamed.
+      # Without this check, a missing secret looks identical to "no change".
+      - name: Check SITEMAP_CDN_URL secret is set
+        env:
+          SITEMAP_CDN_URL: ${{ secrets.SITEMAP_CDN_URL }}
+        run: |
+          if [ -z "$SITEMAP_CDN_URL" ]; then
+            echo "::error::Repo secret SITEMAP_CDN_URL is not set. Add it under"
+            echo "::error::Settings → Secrets and variables → Actions → New repository secret."
+            exit 1
+          fi
+          echo "SITEMAP_CDN_URL is set (length: ${#SITEMAP_CDN_URL} chars)."
 
       - name: Fetch live sitemap and capture if changed
         id: capture
         env:
           SITEMAP_CDN_URL: ${{ secrets.SITEMAP_CDN_URL }}
         run: |
+          set -o pipefail
+          # Run the script; its stdout is shown in the log AND saved.
+          # If node exits nonzero (config/fetch/marker error), this step fails.
           node scripts/capture-live.mjs | tee capture.log
-          # surface the CAPTURED_CHANGE flag to later steps
+          echo "----"
           grep '^CAPTURED_CHANGE=' capture.log | tail -1 >> "$GITHUB_OUTPUT"
           rm -f capture.log
+
+      - name: Show what changed (diff vs previous commit)
+        if: steps.capture.outputs.CAPTURED_CHANGE == 'true'
+        run: |
+          echo "Change detected. Diff of the live sitemap vs the committed version:"
+          git --no-pager diff -- build/sitemap.js | head -200
 
       - name: Commit and push the dated snapshot
         if: steps.capture.outputs.CAPTURED_CHANGE == 'true'
@@ -59,6 +81,7 @@ jobs:
           git tag -f "capture-${DATE}"
           git push origin HEAD
           git push -f origin "capture-${DATE}"
+          echo "::notice::Captured live change and committed as capture-${DATE}."
 
       - name: Report no change
         if: steps.capture.outputs.CAPTURED_CHANGE != 'true'

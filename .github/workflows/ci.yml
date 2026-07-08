@@ -4,10 +4,12 @@ name: sitemap-ci
 # validates it. This guarantees the committed artifact is always the exact
 # output of the source, which is what drift detection relies on.
 
+# Runs on pull requests only. The "src matches build" gate is meant to catch a
+# human PR author who forgot to rebuild. The auto-capture bot pushes UI edits
+# straight to main (build/sitemap.js with no src/ counterpart), which must NOT
+# be blocked by this gate — so we don't run on push to main.
 on:
   pull_request:
-  push:
-    branches: [main]
 
 jobs:
   build-and-validate:
@@ -16,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
       - name: Build sitemap
         run: npm run build
       - name: Validate sitemap
