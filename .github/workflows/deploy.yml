@@ -1,0 +1,47 @@
+name: sitemap-deploy
+
+# FULL AUTOMATION: on merge to main, deploy build/sitemap.js to Data Cloud via
+# the official Connect API (PUT /ssot/connections/{id}/sitemap). No more manual
+# copy-paste. Idempotent — skips the PUT if the live sitemap already matches.
+#
+# SETUP: define repo secrets SF_INSTANCE_URL, SF_ACCESS_TOKEN, SF_CONNECTION_ID.
+# For CI, generate SF_ACCESS_TOKEN via the JWT Bearer flow (see README) rather
+# than a hand-copied token, which expires.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'build/sitemap.js'
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Check required secrets are set
+        env:
+          SF_INSTANCE_URL: ${{ secrets.SF_INSTANCE_URL }}
+          SF_ACCESS_TOKEN: ${{ secrets.SF_ACCESS_TOKEN }}
+          SF_CONNECTION_ID: ${{ secrets.SF_CONNECTION_ID }}
+        run: |
+          missing=""
+          [ -z "$SF_INSTANCE_URL" ] && missing="$missing SF_INSTANCE_URL"
+          [ -z "$SF_ACCESS_TOKEN" ] && missing="$missing SF_ACCESS_TOKEN"
+          [ -z "$SF_CONNECTION_ID" ] && missing="$missing SF_CONNECTION_ID"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repo secret(s):$missing"
+            exit 1
+          fi
+
+      - name: Deploy sitemap to Data Cloud
+        env:
+          SF_INSTANCE_URL: ${{ secrets.SF_INSTANCE_URL }}
+          SF_ACCESS_TOKEN: ${{ secrets.SF_ACCESS_TOKEN }}
+          SF_CONNECTION_ID: ${{ secrets.SF_CONNECTION_ID }}
+        run: node scripts/deploy.mjs

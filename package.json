@@ -10,6 +10,8 @@
     "build": "node scripts/build.mjs",
     "validate": "node scripts/validate.mjs",
     "drift-check": "node scripts/drift-check.mjs",
+    "deploy": "node scripts/deploy.mjs",
+    "capture": "node scripts/capture-live.mjs",
     "ci": "npm run build && npm run validate"
   },
   "license": "UNLICENSED",

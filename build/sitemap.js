@@ -1,265 +1,265 @@
 window.onload = function() {
 
     // DEV : Debug ON
-    console.log('DC SDK loadeded >>: ' + SalesforceInteractions);
-    SalesforceInteractions.setLoggingLevel('debug');
+    console.log(&#39;DC SDK loadeded &gt;&gt;: &#39; + SalesforceInteractions);
+    SalesforceInteractions.setLoggingLevel(&#39;debug&#39;);
 
     SalesforceInteractions.Personalization.Config.initialize({
         additionalTransformers: [
             {
-                  name: 'Products Rec Template',
-                  transformerType: 'Handlebars',
+                  name: &#39;Products Rec Template&#39;,
+                  transformerType: &#39;Handlebars&#39;,
                   lastModifiedDate: new Date().getTime(),
                   substitutionDefinitions: {
-                      blocktitle: { defaultValue: '[attributes].[Block_Title]'},
-                      recs: { defaultValue: '[data]' },
-                      name: { defaultValue: '[ssot__Name__c]' },
-                      description: { defaultValue: '[ssot__Description__c]' },
-                      image: { defaultValue: '[Image_URL__c]' }
+                      blocktitle: { defaultValue: &#39;[attributes].[Block_Title]&#39;},
+                      recs: { defaultValue: &#39;[data]&#39; },
+                      name: { defaultValue: &#39;[ssot__Name__c]&#39; },
+                      description: { defaultValue: &#39;[ssot__Description__c]&#39; },
+                      image: { defaultValue: &#39;[Image_URL__c]&#39; }
                   },
                   transformerTypeDetails: {
                       html: 
-                            `<section class="related-products">
-                                {{#if (subVar 'recs')}}
-                                    <h2>{{subVar 'blocktitle'}}</h2>
-                                    <div class="product-list">
-                                        {{#each (subVar 'recs')}}
-                                        <div class="product">
-                                            <img src="{{subVar 'image' }}" alt="{{subVar 'name'}}" >
-                                            <h3>{{subVar 'name'}}</h3>
-                                            <p>{{subVar 'description'}}</p>
-                                        </div>
+                            `&lt;section class=&quot;related-products&quot;&gt;
+                                {{#if (subVar &#39;recs&#39;)}}
+                                    &lt;h2&gt;{{subVar &#39;blocktitle&#39;}}&lt;/h2&gt;
+                                    &lt;div class=&quot;product-list&quot;&gt;
+                                        {{#each (subVar &#39;recs&#39;)}}
+                                        &lt;div class=&quot;product&quot;&gt;
+                                            &lt;img src=&quot;{{subVar &#39;image&#39; }}&quot; alt=&quot;{{subVar &#39;name&#39;}}&quot; &gt;
+                                            &lt;h3&gt;{{subVar &#39;name&#39;}}&lt;/h3&gt;
+                                            &lt;p&gt;{{subVar &#39;description&#39;}}&lt;/p&gt;
+                                        &lt;/div&gt;
                                         {{/each}}
-                                    </div>
+                                    &lt;/div&gt;
                                 {{else}}
-                                    <h2>You Might Also Like</h2>
-                                    <div class="product-list">
-                                        <div class="product">
-                                            <img src="https://image.s4.sfmc-content.com/lib/fe3411727664067c751c76/m/1/6b430063-7d8a-496e-89b5-d574d34e29c2.png" alt="ePhone 14 Mini">
-                                            <h3>ePhone 14 Mini</h3>
-                                            <p>The miniature form ePhone</p>
-                                        </div>
-                                        <div class="product">
-                                            <img src="https://image.s4.sfmc-content.com/lib/fe3411727664067c751c76/m/1/969c9b49-1d29-4e61-86c1-fd597b62fefb.png" alt="ePhone 14 Pro">
-                                            <h3>ePhone 14 Pro</h3>
-                                            <p>The most powerful phone yet</p>
-                                        </div>
-                                        <div class="product">
-                                            <img src="https://s3.amazonaws.com/northerntrailoutfitters.com/quadstar/default/images/large/ePad5-Mini-blackf.jpg" alt="ePad 5 Mini">
-                                            <h3>ePad 5 Mini</h3>
-                                            <p>The best tiny tablet</p>
-                                        </div>
-                                    </div>
+                                    &lt;h2&gt;You Might Also Like&lt;/h2&gt;
+                                    &lt;div class=&quot;product-list&quot;&gt;
+                                        &lt;div class=&quot;product&quot;&gt;
+                                            &lt;img src=&quot;https://image.s4.sfmc-content.com/lib/fe3411727664067c751c76/m/1/6b430063-7d8a-496e-89b5-d574d34e29c2.png&quot; alt=&quot;ePhone 14 Mini&quot;&gt;
+                                            &lt;h3&gt;ePhone 14 Mini&lt;/h3&gt;
+                                            &lt;p&gt;The miniature form ePhone&lt;/p&gt;
+                                        &lt;/div&gt;
+                                        &lt;div class=&quot;product&quot;&gt;
+                                            &lt;img src=&quot;https://image.s4.sfmc-content.com/lib/fe3411727664067c751c76/m/1/969c9b49-1d29-4e61-86c1-fd597b62fefb.png&quot; alt=&quot;ePhone 14 Pro&quot;&gt;
+                                            &lt;h3&gt;ePhone 14 Pro&lt;/h3&gt;
+                                            &lt;p&gt;The most powerful phone yet&lt;/p&gt;
+                                        &lt;/div&gt;
+                                        &lt;div class=&quot;product&quot;&gt;
+                                            &lt;img src=&quot;https://s3.amazonaws.com/northerntrailoutfitters.com/quadstar/default/images/large/ePad5-Mini-blackf.jpg&quot; alt=&quot;ePad 5 Mini&quot;&gt;
+                                            &lt;h3&gt;ePad 5 Mini&lt;/h3&gt;
+                                            &lt;p&gt;The best tiny tablet&lt;/p&gt;
+                                        &lt;/div&gt;
+                                    &lt;/div&gt;
                                 {{/if}}
-                            </section>`
+                            &lt;/section&gt;`
                         
                 }
             }
         ],
         personalizationExperienceConfigs: [
           {
-            "name": "Home_Banner_Personnalization",
-            "dataProvider": {
-              "type": "PersonalizationPoint",
-              "referenceType": "ApiName",
-              "value": "Home_Banner_Personnalization"
+            &quot;name&quot;: &quot;Home_Banner_Personnalization&quot;,
+            &quot;dataProvider&quot;: {
+              &quot;type&quot;: &quot;PersonalizationPoint&quot;,
+              &quot;referenceType&quot;: &quot;ApiName&quot;,
+              &quot;value&quot;: &quot;Home_Banner_Personnalization&quot;
             },
-            "sourceMatchers": [
+            &quot;sourceMatchers&quot;: [
               {
-                "type": "PageType",
-                "value": "page"
+                &quot;type&quot;: &quot;PageType&quot;,
+                &quot;value&quot;: &quot;page&quot;
               }
             ],
-            "transformationConfig": {
-              "when": "Immediately",
-              "method": "ReplaceElementContent",
-              "transformations": [
+            &quot;transformationConfig&quot;: {
+              &quot;when&quot;: &quot;Immediately&quot;,
+              &quot;method&quot;: &quot;ReplaceElementContent&quot;,
+              &quot;transformations&quot;: [
                 {
-                  "transformerName": "HTMLElementModifier",
-                  "path": "html > body > div:nth-of-type(2)",
-                  "tag": "DIV",
-                  "substitutionValues": {
-                    "style.backgroundImage": "[attributes].[BackgroundImageUrl]"
+                  &quot;transformerName&quot;: &quot;HTMLElementModifier&quot;,
+                  &quot;path&quot;: &quot;html &gt; body &gt; div:nth-of-type(2)&quot;,
+                  &quot;tag&quot;: &quot;DIV&quot;,
+                  &quot;substitutionValues&quot;: {
+                    &quot;style.backgroundImage&quot;: &quot;[attributes].[BackgroundImageUrl]&quot;
                   }
                 },
                 {
-                  "transformerName": "HTMLElementModifier",
-                  "tag": "H1",
-                  "path": "DIV.hero-text>h1",
-                  "substitutionValues": {
-                    "innerText": "[attributes].[Header]"
+                  &quot;transformerName&quot;: &quot;HTMLElementModifier&quot;,
+                  &quot;tag&quot;: &quot;H1&quot;,
+                  &quot;path&quot;: &quot;DIV.hero-text&gt;h1&quot;,
+                  &quot;substitutionValues&quot;: {
+                    &quot;innerText&quot;: &quot;[attributes].[Header]&quot;
                   }
                 },
                 {
-                  "transformerName": "HTMLElementModifier",
-                  "tag": "P",
-                  "path": "html > body > div:nth-of-type(2) > div > p",
-                  "substitutionValues": {
-                    "innerText": "[attributes].[Subheader]"
+                  &quot;transformerName&quot;: &quot;HTMLElementModifier&quot;,
+                  &quot;tag&quot;: &quot;P&quot;,
+                  &quot;path&quot;: &quot;html &gt; body &gt; div:nth-of-type(2) &gt; div &gt; p&quot;,
+                  &quot;substitutionValues&quot;: {
+                    &quot;innerText&quot;: &quot;[attributes].[Subheader]&quot;
                   }
                 }
               ]
             },
-            "lastModifiedDate": 1739545922100
+            &quot;lastModifiedDate&quot;: 1739545922100
           },
           {
-            "name": "Single_Product_Recommendation",
-            "dataProvider": {
-              "type": "PersonalizationPoint",
-              "referenceType": "ApiName",
-              "value": "Single_Product_Recommendation"
+            &quot;name&quot;: &quot;Single_Product_Recommendation&quot;,
+            &quot;dataProvider&quot;: {
+              &quot;type&quot;: &quot;PersonalizationPoint&quot;,
+              &quot;referenceType&quot;: &quot;ApiName&quot;,
+              &quot;value&quot;: &quot;Single_Product_Recommendation&quot;
             },
-            "sourceMatchers": [
+            &quot;sourceMatchers&quot;: [
               {
-                "type": "PageType",
-                "value": "Product"
+                &quot;type&quot;: &quot;PageType&quot;,
+                &quot;value&quot;: &quot;Product&quot;
               }
             ],
-            "transformationConfig": {
-              "when": "Immediately",
-              "method": "ReplaceElementContent",
-              "transformations": [
+            &quot;transformationConfig&quot;: {
+              &quot;when&quot;: &quot;Immediately&quot;,
+              &quot;method&quot;: &quot;ReplaceElementContent&quot;,
+              &quot;transformations&quot;: [
                 {
-                  "transformerName": "HTMLElementModifier",
-                  "path": "html > body > section > div > div > h3",
-                  "tag": "H3",
-                  "substitutionValues": {
-                    "innerText": "[data].[0].[ssot__Name__c]"
+                  &quot;transformerName&quot;: &quot;HTMLElementModifier&quot;,
+                  &quot;path&quot;: &quot;html &gt; body &gt; section &gt; div &gt; div &gt; h3&quot;,
+                  &quot;tag&quot;: &quot;H3&quot;,
+                  &quot;substitutionValues&quot;: {
+                    &quot;innerText&quot;: &quot;[data].[0].[ssot__Name__c]&quot;
                   }
                 },
                 {
-                  "transformerName": "HTMLElementModifier",
-                  "tag": "P",
-                  "path": "html > body > section > div > div > p",
-                  "substitutionValues": {
-                    "innerText": "[data].[0].[ssot__Description__c]"
+                  &quot;transformerName&quot;: &quot;HTMLElementModifier&quot;,
+                  &quot;tag&quot;: &quot;P&quot;,
+                  &quot;path&quot;: &quot;html &gt; body &gt; section &gt; div &gt; div &gt; p&quot;,
+                  &quot;substitutionValues&quot;: {
+                    &quot;innerText&quot;: &quot;[data].[0].[ssot__Description__c]&quot;
                   }
                 },
                 {
-                  "transformerName": "HTMLElementModifier",
-                  "tag": "IMG",
-                  "path": "html > body > section > div > div > img",
-                  "substitutionValues": {
-                    "attributes.src": "[data].[0].[Image_URL__c]"
+                  &quot;transformerName&quot;: &quot;HTMLElementModifier&quot;,
+                  &quot;tag&quot;: &quot;IMG&quot;,
+                  &quot;path&quot;: &quot;html &gt; body &gt; section &gt; div &gt; div &gt; img&quot;,
+                  &quot;substitutionValues&quot;: {
+                    &quot;attributes.src&quot;: &quot;[data].[0].[Image_URL__c]&quot;
                   }
                 }
               ]
             },
-            "lastModifiedDate": 1739882556670
+            &quot;lastModifiedDate&quot;: 1739882556670
           }
         ]
     });
 
     // Init SDK: initialize with default optin
-    // /!\ not production ready: update to declarative consent
+    // /!&#92; not production ready: update to declarative consent
     SalesforceInteractions.init({
         consents: [
             {
-                provider: "ConsentProvider",
+                provider: &quot;ConsentProvider&quot;,
                 purpose: SalesforceInteractions.ConsentPurpose.Tracking,
                 status: SalesforceInteractions.ConsentStatus.OptIn
             }
         ],
         personalization: {
-            dataspace: "default",
+            dataspace: &quot;default&quot;,
         }
-    }).then(() => {
-        console.log('Interactions WebSDK initialized>>>');
-    }).then(() => {
+    }).then(() =&gt; {
+        console.log(&#39;Interactions WebSDK initialized&gt;&gt;&gt;&#39;);
+    }).then(() =&gt; {
         var config = {
             global: {
-              locale: document.querySelector('meta[name="locale"]').content,
-              onActionEvent: (actionEvent) => {
+              locale: document.querySelector(&#39;meta[name=&quot;locale&quot;]&#39;).content,
+              onActionEvent: (actionEvent) =&gt; {
               // Ensure objects exist
               actionEvent.user = actionEvent.user || {};
               actionEvent.user.attributes = actionEvent.user.attributes || {};
-              actionEvent.user.attributes.eventType = actionEvent.user.attributes.eventType || "identity";
-              const meta = document.querySelector('meta[name="locale"]');
+              actionEvent.user.attributes.eventType = actionEvent.user.attributes.eventType || &quot;identity&quot;;
+              const meta = document.querySelector(&#39;meta[name=&quot;locale&quot;]&#39;);
               actionEvent.user.attributes.sourceLocale = meta ? meta.content : null;
 
               return actionEvent;
             },
-                contentZones: ["div#hero-image"]
+                contentZones: [&quot;div#hero-image&quot;]
             },
             pageTypes: [
                 {
-                    // Track product pages only: 'isMatch' regex filters
-                    name: "product",
-                    isMatch: () => /\/tuxn3zbr2r4/.test(window.location.href),
+                    // Track product pages only: &#39;isMatch&#39; regex filters
+                    name: &quot;product&quot;,
+                    isMatch: () =&gt; /&#92;/tuxn3zbr2r4/.test(window.location.href),
                     interaction: {
-                        name: "ViewCatalogObject",
+                        name: &quot;ViewCatalogObject&quot;,
                         catalogObject: {
-                            type: "Product",
-                            id: 'product_1',
-                            interactionName: "View",
+                            type: &quot;Product&quot;,
+                            id: &#39;product_1&#39;,
+                            interactionName: &quot;View&quot;,
                             attributes: {
                                 description: getProductDescription(),
                                 name: getProductTitle(),
-                                sourcePageSubtype: 'Auto'
+                                sourcePageSubtype: &#39;Auto&#39;
                             }
                         }
                     }
                 },
                 {
-                    // Track product pages only: 'isMatch' regex filters
-                    name: "product",
-                    isMatch: () => /\/kphq50fzfi4/.test(window.location.href),
+                    // Track product pages only: &#39;isMatch&#39; regex filters
+                    name: &quot;product&quot;,
+                    isMatch: () =&gt; /&#92;/kphq50fzfi4/.test(window.location.href),
                     interaction: {
-                        name: "ViewCatalogObject",
+                        name: &quot;ViewCatalogObject&quot;,
                         catalogObject: {
-                            type: "Product",
-                            id: 'product_2',
-                            interactionName: "View",
+                            type: &quot;Product&quot;,
+                            id: &#39;product_2&#39;,
+                            interactionName: &quot;View&quot;,
                             attributes: {
                                 description: getProductDescription(),
                                 name: getProductTitle(),
-                                sourcePageSubtype: 'Home'
+                                sourcePageSubtype: &#39;Home&#39;
                               
                             }
                         }
                     }
                 },
                 {
-                    // Track product pages only: 'isMatch' regex filters
-                    name: "product",
-                    isMatch: () => /\/ozwtqwtouvl/.test(window.location.href),
+                    // Track product pages only: &#39;isMatch&#39; regex filters
+                    name: &quot;product&quot;,
+                    isMatch: () =&gt; /&#92;/ozwtqwtouvl/.test(window.location.href),
                     interaction: {
-                        name: "ViewCatalogObject",
+                        name: &quot;ViewCatalogObject&quot;,
                         catalogObject: {
-                            type: "Product",
-                            id: 'product_3',
-                            interactionName: "View",
+                            type: &quot;Product&quot;,
+                            id: &#39;product_3&#39;,
+                            interactionName: &quot;View&quot;,
                             attributes: {
                                 description: getProductDescription(),
                                 name: getProductTitle(),
-                                sourcePageSubtype: 'Alumni'
+                                sourcePageSubtype: &#39;Alumni&#39;
                             }
                         }
                     }
                 },
                 //track homepage views
                 {
-                    name: "homepage",
-                    isMatch: () => /^\/$/.test(window.location.pathname) || window.location.pathname === "/b0xqymni1uo", 
+                    name: &quot;homepage&quot;,
+                    isMatch: () =&gt; /^&#92;/$/.test(window.location.pathname) || window.location.pathname === &quot;/b0xqymni1uo&quot;, 
                     interaction: {
-                        name: "Homepage View",
-                        eventType: "PageView", 
+                        name: &quot;Homepage View&quot;,
+                        eventType: &quot;PageView&quot;, 
                     }
                 },
                 {
                     // Track every page of the website
-                    name: "page",
-                    isMatch: () => true,
+                    name: &quot;page&quot;,
+                    isMatch: () =&gt; true,
                     interaction: {
                         name: getPageName(),
-                        eventType: "PageView",
+                        eventType: &quot;PageView&quot;,
                         browse: {
                             pageName: getPageName(),
-                            pageType: "page",
+                            pageType: &quot;page&quot;,
                             pageUrl: window.location.href
                         },
                         catalogObject: {
-                            type: "PageView",
+                            type: &quot;PageView&quot;,
                             id: window.location.pathname,
                             attributes: {
                                 url: window.location.href,
@@ -277,20 +277,20 @@ window.onload = function() {
         SalesforceInteractions.initSitemap(config);
     });
 const productPageMap = {
-    "/tuxn3zbr2r4": "Auto",
-    "/kphq50fzfi4": "Home",
-    "/ozwtqwtouvl": "Alumni"
+    &quot;/tuxn3zbr2r4&quot;: &quot;Auto&quot;,
+    &quot;/kphq50fzfi4&quot;: &quot;Home&quot;,
+    &quot;/ozwtqwtouvl&quot;: &quot;Alumni&quot;
 };
 
 const currentPath = window.location.pathname;
-  if (productPageMap[currentPath] && !window.productEventSent) {
+  if (productPageMap[currentPath] &amp;&amp; !window.productEventSent) {
     window.productEventSent = true;
 
     SalesforceInteractions.sendEvent({
         interaction: {
-            name: "Sub Page Type",
-            eventType: "userEngagement",
-            category: "Engagement",
+            name: &quot;Sub Page Type&quot;,
+            eventType: &quot;userEngagement&quot;,
+            category: &quot;Engagement&quot;,
             sourcePageSubtype: productPageMap[currentPath]
         }
     });
@@ -298,17 +298,17 @@ const currentPath = window.location.pathname;
 };
 //   ----------------------------------------------------------------
  window.submitAuthForm = function() {
-        const inputs = document.getElementById("authenticationForm").elements;
+        const inputs = document.getElementById(&quot;authenticationForm&quot;).elements;
 
         SalesforceInteractions.sendEvent({
             user: {
                 attributes: {
-                    eventType: 'identity',
-                    firstName: inputs["firstname"].value,
-                    lastName: inputs["lastname"].value,
-                    email: inputs["email"].value,
-                  phoneNumber: inputs["phone"].value,
-birthdate: inputs["birthdate"].value,
+                    eventType: &#39;identity&#39;,
+                    firstName: inputs[&quot;firstname&quot;].value,
+                    lastName: inputs[&quot;lastname&quot;].value,
+                    email: inputs[&quot;email&quot;].value,
+                  phoneNumber: inputs[&quot;phone&quot;].value,
+birthdate: inputs[&quot;birthdate&quot;].value,
                     sourcePageType: window.location.href,
                     isAnonymous: 0
                 }
@@ -318,8 +318,8 @@ birthdate: inputs["birthdate"].value,
     SalesforceInteractions.sendEvent({
         user: {
             attributes: {
-                eemail: inputs["email"].value,
-                eventType: "contactPointEmail",
+                eemail: inputs[&quot;email&quot;].value,
+                eventType: &quot;contactPointEmail&quot;,
             }
         }
     });
@@ -327,8 +327,8 @@ birthdate: inputs["birthdate"].value,
     SalesforceInteractions.sendEvent({
         user: {
             attributes: {
-                phoneNumber: inputs["phone"].value,
-                eventType: "contactPointPhone",
+                phoneNumber: inputs[&quot;phone&quot;].value,
+                eventType: &quot;contactPointPhone&quot;,
             }
         }
     });
@@ -336,9 +336,9 @@ birthdate: inputs["birthdate"].value,
     SalesforceInteractions.sendEvent({
         user: {
             attributes: {
-                eventType: 'partyIdentification',
-                IDName: "Web",
-                IDType: "WebTracking"
+                eventType: &#39;partyIdentification&#39;,
+                IDName: &quot;Web&quot;,
+                IDType: &quot;WebTracking&quot;
             }
         }
     });
@@ -348,13 +348,13 @@ birthdate: inputs["birthdate"].value,
 function addToCart(productId) {
     SalesforceInteractions.sendEvent({
         interaction: {
-            name: "Add To Cart",
+            name: &quot;Add To Cart&quot;,
             lineItem: {
-                catalogObjectType: "Product",
+                catalogObjectType: &quot;Product&quot;,
                 catalogObjectId: getProductId(),
                 quantity: 1,
                 price: 148.00,
-                currency: "USD"
+                currency: &quot;USD&quot;
             }
         }
     });
@@ -364,28 +364,28 @@ function addToCart(productId) {
 // ----------------------------------------------------------------
 window.submitSimplePopup = function() {
     // 1. Get Email
-    var emailInput = document.getElementById("dc-email");
+    var emailInput = document.getElementById(&quot;dc-email&quot;);
     if (!emailInput) return;
     
     var email = emailInput.value;
 
     // 2. Validation
-    if (!email || email.indexOf('@') === -1) {
-        document.getElementById("dc-error").style.display = 'block';
+    if (!email || email.indexOf(&#39;@&#39;) === -1) {
+        document.getElementById(&quot;dc-error&quot;).style.display = &#39;block&#39;;
         return;
     }
-    document.getElementById("dc-error").style.display = 'none';
+    document.getElementById(&quot;dc-error&quot;).style.display = &#39;none&#39;;
 
     // 3. Send Event to Data Cloud
     SalesforceInteractions.sendEvent({
         interaction: {
-                        name: 'Popup Signup Form Submitted',
-                        eventType: 'userEngagement',
-                        category: "Engagement"
+                        name: &#39;Popup Signup Form Submitted&#39;,
+                        eventType: &#39;userEngagement&#39;,
+                        category: &quot;Engagement&quot;
                     },
         user: {
             attributes: {
-                eventType: 'identity',
+                eventType: &#39;identity&#39;,
                 email: email,
                 isAnonymous: 0,
                 sourcePageType: window.location.href
@@ -396,9 +396,9 @@ window.submitSimplePopup = function() {
     SalesforceInteractions.sendEvent({
         user: {
             attributes: {
-                eventType: 'partyIdentification',
-                IDName: "Signup Popup",
-                IDType: "PopupSignup Submission"
+                eventType: &#39;partyIdentification&#39;,
+                IDName: &quot;Signup Popup&quot;,
+                IDType: &quot;PopupSignup Submission&quot;
             }
         }
     });
@@ -407,27 +407,27 @@ window.submitSimplePopup = function() {
         user: {
             attributes: {
                 eemail: email,
-                eventType: "contactPointEmail",
+                eventType: &quot;contactPointEmail&quot;,
             }
         }
     });
 
     // 4. UI Success
-    document.getElementById("dc-form-state").style.display = 'none';
-    document.getElementById("dc-success-state").style.display = 'block';
+    document.getElementById(&quot;dc-form-state&quot;).style.display = &#39;none&#39;;
+    document.getElementById(&quot;dc-success-state&quot;).style.display = &#39;block&#39;;
 
 };
 // ----------------------------
 // utility functions for each Campaign
 // ----------------------------
 
-  window.addEventListener("DOMContentLoaded", () => {
+  window.addEventListener(&quot;DOMContentLoaded&quot;, () =&gt; {
     // ─── SHARED POPUP CONFIG ───────────────────────────────────────────────────
     // immediate = WPM shows it (desktop exit-intent) → JS only fires events.
     // gated     = mobile/tablet + inactivity, JS reveals it.
     var SP_POPUPS = [
-      { id: 'sp-campaign',        mode: 'immediate' },   // desktop — WPM handles exit-intent
-      { id: 'sp-campaign-mobile', mode: 'gated'     }    // mobile  — JS handles inactivity
+      { id: &#39;sp-campaign&#39;,        mode: &#39;immediate&#39; },   // desktop — WPM handles exit-intent
+      { id: &#39;sp-campaign-mobile&#39;, mode: &#39;gated&#39;     }    // mobile  — JS handles inactivity
     ];
     var SP_POPUP_IDS = SP_POPUPS.map(function (p) { return p.id; });
 
@@ -438,28 +438,28 @@ window.submitSimplePopup = function() {
 
     function isMobileOrTablet() {
       return /Mobi|Android|iPad|iPhone|iPod|Tablet/i.test(navigator.userAgent) ||
-             window.matchMedia("(max-width: 1024px)").matches;
+             window.matchMedia(&quot;(max-width: 1024px)&quot;).matches;
     }
 
     function sendViewed(name) {
       if (!name || viewedSent[name] || !window.SalesforceInteractions) return;
       viewedSent[name] = true;
       SalesforceInteractions.sendEvent({
-        interaction: { name: "Viewed - " + name, eventType: 'userEngagement', category: "Engagement" }
+        interaction: { name: &quot;Viewed - &quot; + name, eventType: &#39;userEngagement&#39;, category: &quot;Engagement&quot; }
       });
     }
     function sendClicked(name) {
       if (!name || clickedSent[name] || !window.SalesforceInteractions) return;
       clickedSent[name] = true;
       SalesforceInteractions.sendEvent({
-        interaction: { name: "Clicked On Popup Campaign - " + name, eventType: 'userEngagement', category: "Engagement" }
+        interaction: { name: &quot;Clicked On Popup Campaign - &quot; + name, eventType: &#39;userEngagement&#39;, category: &quot;Engagement&quot; }
       });
     }
     function sendDismissed(name) {
       if (!name || dismissedSent[name] || !window.SalesforceInteractions) return;
       dismissedSent[name] = true;
       SalesforceInteractions.sendEvent({
-        interaction: { name: "Dismissed - " + name, eventType: 'userEngagement', category: "Engagement" }
+        interaction: { name: &quot;Dismissed - &quot; + name, eventType: &#39;userEngagement&#39;, category: &quot;Engagement&quot; }
       });
     }
 
@@ -467,14 +467,14 @@ window.submitSimplePopup = function() {
     function initGatedPopup(overlay) {
       if (!isMobileOrTablet()) { overlay.remove(); return; }   // desktop → remove, no event
       var timer;
-      var events = ["mousemove", "keydown", "scroll", "touchstart", "click"];
+      var events = [&quot;mousemove&quot;, &quot;keydown&quot;, &quot;scroll&quot;, &quot;touchstart&quot;, &quot;click&quot;];
       function show() {
         clearTimeout(timer);
         events.forEach(function (e) { window.removeEventListener(e, reset); });
         document.body.appendChild(overlay);
-        overlay.style.display = "flex";
-        requestAnimationFrame(function () { overlay.style.opacity = "1"; });
-        sendViewed(overlay.getAttribute('data-name') || overlay.id);
+        overlay.style.display = &quot;flex&quot;;
+        requestAnimationFrame(function () { overlay.style.opacity = &quot;1&quot;; });
+        sendViewed(overlay.getAttribute(&#39;data-name&#39;) || overlay.id);
       }
       function reset() { clearTimeout(timer); timer = setTimeout(show, INACTIVITY_MS); }
       events.forEach(function (e) { window.addEventListener(e, reset, { passive: true }); });
@@ -482,11 +482,11 @@ window.submitSimplePopup = function() {
     }
 
     function handlePopup(overlay, cfg) {
-      if (cfg.mode === 'gated') {
+      if (cfg.mode === &#39;gated&#39;) {
         initGatedPopup(overlay);
       } else {
         // immediate: WPM already shows it (exit-intent) → just fire Viewed once
-        sendViewed(overlay.getAttribute('data-name') || overlay.id);
+        sendViewed(overlay.getAttribute(&#39;data-name&#39;) || overlay.id);
       }
     }
 
@@ -495,17 +495,17 @@ window.submitSimplePopup = function() {
     // The `handled` + `viewedSent` guards keep every event firing exactly once.
     var handled = {};
     var observer = new MutationObserver(function (mutations) {
-      for (var m = 0; m < mutations.length; m++) {
+      for (var m = 0; m &lt; mutations.length; m++) {
         var nodes = mutations[m].addedNodes;
-        for (var n = 0; n < nodes.length; n++) {
+        for (var n = 0; n &lt; nodes.length; n++) {
           var node = nodes[n];
           if (node.nodeType !== 1) continue;
-          for (var p = 0; p < SP_POPUPS.length; p++) {
+          for (var p = 0; p &lt; SP_POPUPS.length; p++) {
             var cfg = SP_POPUPS[p];
             if (handled[cfg.id]) continue;
             var overlay = node.id === cfg.id
                 ? node
-                : (node.querySelector ? node.querySelector('#' + cfg.id) : null);
+                : (node.querySelector ? node.querySelector(&#39;#&#39; + cfg.id) : null);
             if (overlay) { handled[cfg.id] = true; handlePopup(overlay, cfg); }
           }
         }
@@ -514,11 +514,11 @@ window.submitSimplePopup = function() {
     observer.observe(document.body, { childList: true, subtree: true });
 
     // ─── CLICK: first meaningful click per popup (ignores close button) ─────────
-    document.addEventListener("click", function (event) {
-      if (event.target.closest('#dc-close-btn')) return;   // close = dismiss, not click
-      for (var i = 0; i < SP_POPUP_IDS.length; i++) {
-        var overlay = event.target.closest('#' + SP_POPUP_IDS[i]);
-        if (overlay) { sendClicked(overlay.getAttribute('data-name') || overlay.id); return; }
+    document.addEventListener(&quot;click&quot;, function (event) {
+      if (event.target.closest(&#39;#dc-close-btn&#39;)) return;   // close = dismiss, not click
+      for (var i = 0; i &lt; SP_POPUP_IDS.length; i++) {
+        var overlay = event.target.closest(&#39;#&#39; + SP_POPUP_IDS[i]);
+        if (overlay) { sendClicked(overlay.getAttribute(&#39;data-name&#39;) || overlay.id); return; }
       }
     });
 
@@ -526,7 +526,7 @@ window.submitSimplePopup = function() {
     window.spDismissPopup = function (personalizationPointName) {
       SP_POPUP_IDS.forEach(function (id) {
         var overlay = document.getElementById(id);
-        if (overlay) overlay.style.display = 'none';
+        if (overlay) overlay.style.display = &#39;none&#39;;
       });
       sendDismissed(personalizationPointName);
     };
@@ -534,25 +534,25 @@ window.submitSimplePopup = function() {
 
 
 // ----------------------------
-// Helpers & utility functions
+// Helpers &amp; utility functions
 // ----------------------------
 
 // Get descriptive page name
 function getPageName() {
     const path = window.location.pathname;
-    const segments = path.split('/').filter(Boolean);
+    const segments = path.split(&#39;/&#39;).filter(Boolean);
 
-    // Si pas de segment, c'est la home
-    if (segments.length === 0) return "Homepage";
+    // Si pas de segment, c&#39;est la home
+    if (segments.length === 0) return &quot;Homepage&quot;;
 
     // On nettoie et transforme chaque segment
-    const cleanedSegments = segments.map(segment => {
-        // Enlève l'extension .html si présente
-        const withoutExt = segment.replace('.html', '');
+    const cleanedSegments = segments.map(segment =&gt; {
+        // Enlève l&#39;extension .html si présente
+        const withoutExt = segment.replace(&#39;.html&#39;, &#39;&#39;);
         // Convertit en camelCase et enlève les caractères non-alphanumériques
         return withoutExt
             .split(/[^a-zA-Z0-9]+/)
-            .map((word, index) => {
+            .map((word, index) =&gt; {
                 if (index === 0) {
                     // Premier mot commence par une majuscule
                     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
@@ -560,48 +560,48 @@ function getPageName() {
                 // Mots suivants en camelCase
                 return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
             })
-            .join('');
+            .join(&#39;&#39;);
     });
 
     // Join avec des underscores et limite à 80 caractères
-    return cleanedSegments.join('_').slice(0, 80);
+    return cleanedSegments.join(&#39;_&#39;).slice(0, 80);
 }
 
 // Get page category
 function getPageCategory() {
-    const segments = window.location.pathname.split('/').filter(Boolean);
-    return segments[0] || 'home';
+    const segments = window.location.pathname.split(&#39;/&#39;).filter(Boolean);
+    return segments[0] || &#39;home&#39;;
 }
 
 function getProductId() {
-    const segments = window.location.pathname.split('/').filter(Boolean);
-    const product = segments[segments.length - 1].replace('.html', '');
-    return product || 'product1';
+    const segments = window.location.pathname.split(&#39;/&#39;).filter(Boolean);
+    const product = segments[segments.length - 1].replace(&#39;.html&#39;, &#39;&#39;);
+    return product || &#39;product1&#39;;
 }
 
 function getProductTitle() {
     try {
-        return document.getElementsByClassName("product-description")[0].getElementsByTagName("h1")[0].innerText;
+        return document.getElementsByClassName(&quot;product-description&quot;)[0].getElementsByTagName(&quot;h1&quot;)[0].innerText;
     }
     catch {
-        return "";
+        return &quot;&quot;;
     }
 }
 
 function getProductDescription() {
     try {
-        return document.getElementsByClassName("product-description")[0].getElementsByTagName("p")[0].innerText;
+        return document.getElementsByClassName(&quot;product-description&quot;)[0].getElementsByTagName(&quot;p&quot;)[0].innerText;
     }
     catch {
-        return "";
+        return &quot;&quot;;
     }
 }
 
 // Display/Hide login form on header button click
  window.displayAuthForm = function() {
-        document.getElementById("loginform").style.visibility = "visible";
+        document.getElementById(&quot;loginform&quot;).style.visibility = &quot;visible&quot;;
     }
 
     window.hideAuthForm = function() {
-        document.getElementById("loginform").style.visibility = "hidden";
+        document.getElementById(&quot;loginform&quot;).style.visibility = &quot;hidden&quot;;
     }

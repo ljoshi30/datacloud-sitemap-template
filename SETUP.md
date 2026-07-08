@@ -7,13 +7,13 @@ rollback, and daily auto-capture of any direct Data Cloud edits.
 There are two phases: **(A)** make a copy of the template, then **(B)** point it
 at the new project's Data Cloud.
 
-> **Fast path:** if you have the template cloned locally (with Node.js 18+
-> installed), the helper script does the local steps (copy + seed + first
-> commit) for you:
+> **Fast path:** if you have the template cloned locally, the helper script does
+> the local steps (copy + seed from the API + first commit) for you:
 > ```bash
-> ./scripts/setup-new-project.sh <project-name> "<cdn-url>" <github-user>
+> SF_ACCESS_TOKEN=... ./scripts/setup-new-project.sh \
+>   <project-name> <instance-url> <connection-id> <github-user>
 > ```
-> It then prints the remaining browser steps (create repo, push, add secret).
+> It then prints the remaining browser steps (create repo, push, add secrets).
 > The manual steps below are the same thing done by hand.
 
 ---
@@ -42,49 +42,44 @@ You now have a full copy with all scripts and workflows.
 
 ## Phase B — Point it at the new project's Data Cloud
 
-### Step 1 — Get the project's CDN URL
+### Step 1 — Get the connection ID
 
-1. Go to **Data Cloud Setup** and search for **Website and Mobile App
-   Connections**.
-2. Open the relevant connection.
-3. Find the **Integration Guide** section and copy the script code / CDN script.
+The Web SDK app is connector type `StreamingApp`. Get a token
+(`sf org display --json` → `accessToken` + `instanceUrl`), then list connections:
 
-The URL you want looks like this (note: each project has a **different beacon
-ID**):
+```bash
+curl -H "Authorization: Bearer $SF_ACCESS_TOKEN" \
+  "$SF_INSTANCE_URL/services/data/v60.0/ssot/connections?connectorType=StreamingApp"
 ```
-https://cdn.c360a.salesforce.com/beacon/c360a/<beacon-id>/scripts/c360a.min.js
-```
+Copy the `id` of the connection whose `label`/`sourceId` matches your site — that
+is your `SF_CONNECTION_ID`.
 
 ### Step 2 — Seed the baseline from what's already live
 
-On your computer (needs Node.js 18+ and the repo cloned locally), from the
-project folder, run **once** to pull the current live sitemap into the repo:
+Pull the current live sitemap into the repo (via the Connect API):
 
 ```bash
-SITEMAP_CDN_URL="<the project's c360a.min.js URL>" \
-  DUMP_LIVE=build/sitemap.js node scripts/drift-check.mjs
-```
+curl -H "Authorization: Bearer $SF_ACCESS_TOKEN" \
+  "$SF_INSTANCE_URL/services/data/v60.0/ssot/connections/$SF_CONNECTION_ID/sitemap" \
+  | python3 -c "import sys,json; open('build/sitemap.js','w').write(json.load(sys.stdin)['sitemap'])"
 
-Then commit and push it:
-
-```bash
 git add build/sitemap.js
 git commit -m "Seed baseline sitemap as deployed"
 git push
 ```
 
-### Step 3 — Add the CDN URL as a repo secret
+### Step 3 — Add repo secrets
 
-So the daily auto-capture job knows which URL to check:
+New repo → **Settings → Secrets and variables → Actions → New repository
+secret**. Add:
 
-1. New repo → **Settings → Secrets and variables → Actions → New repository
-   secret**.
-2. **Name:** `SITEMAP_CDN_URL`
-3. **Value:** the project's `c360a.min.js` URL.
-4. **Add secret**.
+| Name | Value |
+|---|---|
+| `SF_INSTANCE_URL` | `https://YOURDOMAIN.my.salesforce.com` |
+| `SF_CONNECTION_ID` | the connection ID from Step 1 |
+| `SF_ACCESS_TOKEN` | a token — use the **JWT Bearer flow** for CI (hand-copied tokens expire) |
 
-> Optional: add a second secret `ALERT_WEBHOOK` (a Slack/Teams incoming webhook)
-> if you want alerts.
+> Optional: `ALERT_WEBHOOK` (Slack/Teams incoming webhook) for drift alerts.
 
 ### Step 4 — Set the reviewers
 
@@ -98,9 +93,9 @@ team handle that should review this project's sitemap changes.
 | Step | Where | How often |
 |---|---|---|
 | Copy template → new repo | GitHub (browser) | once per project |
-| Get CDN URL (Integration Guide) | Data Cloud Setup | once per project |
-| Seed baseline | Your computer (terminal) | once per project |
-| Add `SITEMAP_CDN_URL` secret | GitHub Settings | once per project |
+| Get connection ID | terminal (Connect API) | once per project |
+| Seed baseline | terminal | once per project |
+| Add `SF_*` secrets | GitHub Settings | once per project |
 | Set CODEOWNERS reviewers | Edit the file | once per project |
 
 ---
@@ -120,7 +115,7 @@ team handle that should review this project's sitemap changes.
 
 - **See what changed** → repo **Commits** page → click any commit for the diff.
 - **Current version** → `build/sitemap.js` on the `main` branch.
-- **Roll back to an old version** → open the old commit → open `build/sitemap.js`
-  → **Raw** → copy → paste into Data Cloud (Sitemap → Upload | Replace Sitemap).
+- **Deploy a change** → merge to main (auto-deploys) or `npm run deploy`.
+- **Roll back** → `git checkout <tag> -- build/sitemap.js` then `npm run deploy`.
 
 For the full explanation, see [README.md](README.md).

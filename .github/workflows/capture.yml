@@ -1,25 +1,23 @@
 name: sitemap-auto-capture
 
-# AUTO-CAPTURE MODE
-# Every day, fetch the sitemap LIVE in Data Cloud (via the beacon CDN). If it
-# differs from what's in Git — i.e. someone edited directly in the Data Cloud UI
-# — automatically commit the live version as a dated snapshot and push it.
+# AUTO-CAPTURE MODE (Connect API)
+# Daily: read the live sitemap from Data Cloud via the official Connect API and,
+# if it differs from Git, commit it as a dated snapshot. Safety net for edits
+# made directly in the Data Cloud UI. Captures WHAT/WHEN; WHO/WHY are
+# unavailable for UI edits because Data Cloud doesn't record them.
 #
-# This guarantees version history + backup + a diff EVEN for changes made
-# outside Git. It cannot record WHO or WHY (Data Cloud doesn't capture that for
-# UI edits), so the commit is attributed to a bot and labelled as an
-# out-of-band capture. Changes made through the normal PR flow already carry
-# who/why and won't trigger this.
-#
-# SETUP: define repo secret SITEMAP_CDN_URL (the beacon bundle URL).
+# SETUP: define repo secrets:
+#   SF_INSTANCE_URL    e.g. https://storm-xxxx.my.salesforce.com
+#   SF_ACCESS_TOKEN    OAuth/session token (use JWT flow for CI, see README)
+#   SF_CONNECTION_ID   the StreamingApp connection ID
 
 on:
   schedule:
     - cron: '0 6 * * *' # daily at 06:00 UTC
-  workflow_dispatch: {} # allow manual runs
+  workflow_dispatch: {}
 
 permissions:
-  contents: write # needed to push the auto-capture commit
+  contents: write
 
 jobs:
   capture:
@@ -30,37 +28,38 @@ jobs:
         with:
           node-version: '24'
 
-      # Fail loudly and clearly if the CDN URL secret is missing/misnamed.
-      # Without this check, a missing secret looks identical to "no change".
-      - name: Check SITEMAP_CDN_URL secret is set
+      - name: Check required secrets are set
         env:
-          SITEMAP_CDN_URL: ${{ secrets.SITEMAP_CDN_URL }}
+          SF_INSTANCE_URL: ${{ secrets.SF_INSTANCE_URL }}
+          SF_ACCESS_TOKEN: ${{ secrets.SF_ACCESS_TOKEN }}
+          SF_CONNECTION_ID: ${{ secrets.SF_CONNECTION_ID }}
         run: |
-          if [ -z "$SITEMAP_CDN_URL" ]; then
-            echo "::error::Repo secret SITEMAP_CDN_URL is not set. Add it under"
-            echo "::error::Settings → Secrets and variables → Actions → New repository secret."
+          missing=""
+          [ -z "$SF_INSTANCE_URL" ] && missing="$missing SF_INSTANCE_URL"
+          [ -z "$SF_ACCESS_TOKEN" ] && missing="$missing SF_ACCESS_TOKEN"
+          [ -z "$SF_CONNECTION_ID" ] && missing="$missing SF_CONNECTION_ID"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repo secret(s):$missing (Settings -> Secrets and variables -> Actions)."
             exit 1
           fi
-          echo "SITEMAP_CDN_URL is set (length: ${#SITEMAP_CDN_URL} chars)."
+          echo "All required secrets are set."
 
-      - name: Fetch live sitemap and capture if changed
+      - name: Capture live sitemap if changed
         id: capture
         env:
-          SITEMAP_CDN_URL: ${{ secrets.SITEMAP_CDN_URL }}
+          SF_INSTANCE_URL: ${{ secrets.SF_INSTANCE_URL }}
+          SF_ACCESS_TOKEN: ${{ secrets.SF_ACCESS_TOKEN }}
+          SF_CONNECTION_ID: ${{ secrets.SF_CONNECTION_ID }}
         run: |
           set -o pipefail
-          # Run the script; its stdout is shown in the log AND saved.
-          # If node exits nonzero (config/fetch/marker error), this step fails.
           node scripts/capture-live.mjs | tee capture.log
           echo "----"
           grep '^CAPTURED_CHANGE=' capture.log | tail -1 >> "$GITHUB_OUTPUT"
           rm -f capture.log
 
-      - name: Show what changed (diff vs previous commit)
+      - name: Show captured diff
         if: steps.capture.outputs.CAPTURED_CHANGE == 'true'
-        run: |
-          echo "Change detected. Diff of the live sitemap vs the committed version:"
-          git --no-pager diff -- build/sitemap.js | head -200
+        run: git --no-pager diff -- build/sitemap.js | head -200
 
       - name: Commit and push the dated snapshot
         if: steps.capture.outputs.CAPTURED_CHANGE == 'true'
@@ -71,13 +70,12 @@ jobs:
           git add build/sitemap.js
           git commit -m "Auto-capture: live sitemap changed on ${DATE}
 
-          Captured directly from the Data Cloud beacon CDN because the live
-          sitemap no longer matched Git. This reflects an edit made in the
-          Data Cloud UI (outside the normal PR flow).
+          Captured from Data Cloud via the Connect API because the live sitemap
+          no longer matched Git. This reflects an edit made in the Data Cloud UI
+          (outside the normal PR flow).
 
           NOTE: Data Cloud does not record who made UI edits or why, so this
-          snapshot preserves WHAT changed and WHEN, but not WHO/WHY. See the
-          diff of this commit for the exact change."
+          snapshot preserves WHAT changed and WHEN, but not WHO/WHY."
           git tag -f "capture-${DATE}"
           git push origin HEAD
           git push -f origin "capture-${DATE}"

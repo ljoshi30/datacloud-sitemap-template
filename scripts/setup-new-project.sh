@@ -3,96 +3,89 @@
 # setup-new-project.sh — scaffold a new project's sitemap repo from this template.
 #
 # Automates the local steps: copy the template, start a fresh git history, seed
-# the baseline from the live Data Cloud sitemap, and make the first commit.
-# The GitHub browser steps (create empty repo, add secret, set reviewers) are
-# printed for you to do — they can't be automated without extra credentials.
+# the baseline from the live Data Cloud sitemap (via the Connect API), and make
+# the first commit. The GitHub browser steps (create empty repo, add secrets)
+# are printed for you to do.
 #
 # USAGE
-#   ./scripts/setup-new-project.sh <project-name> <cdn-url> [github-user]
+#   SF_ACCESS_TOKEN=... ./scripts/setup-new-project.sh <project-name> <instance-url> <connection-id> [github-user]
 #
 # EXAMPLE
-#   ./scripts/setup-new-project.sh acme-store-sitemap \
-#     "https://cdn.c360a.salesforce.com/beacon/c360a/XXXX/scripts/c360a.min.js" \
-#     ljoshi30
+#   SF_ACCESS_TOKEN="00D..." ./scripts/setup-new-project.sh \
+#     acme-store-sitemap https://acme.my.salesforce.com 1WMxxxxxxxxxxxxxxx ljoshi30
 #
-# Run it from INSIDE a checkout of the template repo (so scripts/ exists).
+# Run from INSIDE a checkout of the template repo (so scripts/ exists).
 
 set -euo pipefail
 
-# ---- colours (fall back to plain if not a terminal) ----
 if [ -t 1 ]; then B="\033[1m"; G="\033[32m"; Y="\033[33m"; R="\033[31m"; N="\033[0m"; else B=""; G=""; Y=""; R=""; N=""; fi
 say()  { printf "%b\n" "${B}$*${N}"; }
 ok()   { printf "%b\n" "${G}✓ $*${N}"; }
 warn() { printf "%b\n" "${Y}! $*${N}"; }
 die()  { printf "%b\n" "${R}✗ $*${N}" >&2; exit 1; }
 
-# ---- args ----
 PROJECT="${1:-}"
-CDN_URL="${2:-}"
-GH_USER="${3:-}"
+INSTANCE_URL="${2:-}"
+CONNECTION_ID="${3:-}"
+GH_USER="${4:-}"
+API_VERSION="${SF_API_VERSION:-v60.0}"
 
-if [ -z "$PROJECT" ] || [ -z "$CDN_URL" ]; then
-  die "Usage: ./scripts/setup-new-project.sh <project-name> <cdn-url> [github-user]"
+if [ -z "$PROJECT" ] || [ -z "$INSTANCE_URL" ] || [ -z "$CONNECTION_ID" ]; then
+  die "Usage: SF_ACCESS_TOKEN=... ./scripts/setup-new-project.sh <project-name> <instance-url> <connection-id> [github-user]"
 fi
+[ -n "${SF_ACCESS_TOKEN:-}" ] || die "SF_ACCESS_TOKEN env var is required (sf org display --json)."
 
-# ---- prerequisite checks ----
 command -v git  >/dev/null 2>&1 || die "git is not installed."
-command -v node >/dev/null 2>&1 || die "Node.js is not installed. Install with: brew install node"
-NODE_MAJOR="$(node -p 'process.versions.node.split(".")[0]')"
-[ "$NODE_MAJOR" -ge 18 ] || die "Node.js 18+ required (found $(node --version))."
-[ -f scripts/drift-check.mjs ] || die "Run this from inside a template checkout (scripts/drift-check.mjs not found)."
+command -v curl >/dev/null 2>&1 || die "curl is not installed."
+[ -f scripts/deploy.mjs ] || die "Run this from inside a template checkout (scripts/deploy.mjs not found)."
 
-# Basic sanity on the CDN URL so we fail early on an obvious paste error.
-case "$CDN_URL" in
-  https://*c360a.min.js) : ;;
-  *) warn "CDN URL doesn't look like a c360a.min.js URL. Continuing anyway." ;;
-esac
-
+INSTANCE_URL="${INSTANCE_URL%/}"   # strip trailing slash
 DEST="../$PROJECT"
 [ -e "$DEST" ] && die "Destination $DEST already exists. Pick another name or remove it."
 
-say "== 1/5  Copying template into $DEST"
-# Copy everything except this repo's git history.
+say "== 1/4  Copying template into $DEST"
 mkdir -p "$DEST"
-# Use tar to copy while excluding .git and node_modules.
 tar --exclude='./.git' --exclude='./node_modules' --exclude='.DS_Store' -cf - . | (cd "$DEST" && tar -xf -)
 ok "Template copied."
 
 cd "$DEST"
 
-say "== 2/5  Starting a fresh git history for this project"
+say "== 2/4  Starting a fresh git history"
 git init -q
 git branch -M main
-ok "New empty git history created."
+ok "New git history created."
 
-say "== 3/5  Seeding the baseline from the LIVE Data Cloud sitemap"
-if SITEMAP_CDN_URL="$CDN_URL" DUMP_LIVE=build/sitemap.js node scripts/drift-check.mjs; then
-  ok "Live sitemap captured into build/sitemap.js"
-else
-  die "Could not fetch/extract the live sitemap. Double-check the CDN URL."
-fi
+say "== 3/4  Seeding baseline from the live sitemap (Connect API)"
+URL="$INSTANCE_URL/services/data/$API_VERSION/ssot/connections/$CONNECTION_ID/sitemap"
+HTTP=$(curl -sS -o /tmp/setup_sitemap.json -w "%{http_code}" \
+  -H "Authorization: Bearer $SF_ACCESS_TOKEN" -H "Accept: application/json" "$URL")
+[ "$HTTP" = "200" ] || die "Sitemap read failed (HTTP $HTTP). Check instance URL, token, and connection ID."
+python3 -c "import json; open('build/sitemap.js','w').write(json.load(open('/tmp/setup_sitemap.json'))['sitemap'])" \
+  || die "Could not parse sitemap from API response."
+rm -f /tmp/setup_sitemap.json
+ok "Wrote build/sitemap.js ($(wc -c < build/sitemap.js) bytes)."
 
-say "== 4/5  Making the first commit"
+say "== 4/4  First commit"
 git add -A
 git -c commit.gpgsign=false commit -q -m "Seed baseline sitemap as deployed"
 ok "First commit created."
 
-say "== 5/5  Next steps (do these in your browser) ============================"
+say "== Next steps (do these in your browser) ==============================="
 REMOTE_HINT="https://github.com/<your-user>/$PROJECT.git"
-if [ -n "$GH_USER" ]; then REMOTE_HINT="https://github.com/$GH_USER/$PROJECT.git"; fi
+[ -n "$GH_USER" ] && REMOTE_HINT="https://github.com/$GH_USER/$PROJECT.git"
 cat <<EOF
 
   a) Create an EMPTY repo on GitHub (no README/.gitignore):
        https://github.com/new   ->  name it: $PROJECT
 
-  b) Connect and push (run these here):
+  b) Connect and push:
        git remote add origin $REMOTE_HINT
        git push -u origin main
 
-  c) Add the CDN secret so the daily job works:
-       repo -> Settings -> Secrets and variables -> Actions -> New repository secret
-       Name:  SITEMAP_CDN_URL
-       Value: $CDN_URL
+  c) Add repo secrets (Settings -> Secrets and variables -> Actions):
+       SF_INSTANCE_URL   = $INSTANCE_URL
+       SF_CONNECTION_ID  = $CONNECTION_ID
+       SF_ACCESS_TOKEN   = <token; use JWT flow for CI, see README>
 
   d) Set reviewers: edit .github/CODEOWNERS -> replace @your-org/data-cloud-team
 
