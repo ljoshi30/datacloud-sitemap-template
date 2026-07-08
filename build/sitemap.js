@@ -1,14 +1,7 @@
-/* GENERATED FILE — do not edit by hand.
- * Built from src/ by scripts/build.mjs. Edit the source modules instead.
- * This is the artifact pasted into the Data Cloud website connector. */
-
-
-
-/* ---- entry: src/sitemap.js ---- */
 window.onload = function() {
 
     // DEV : Debug ON
-    console.log('DC SDK loaded: ' + SalesforceInteractions);
+    console.log('DC SDK loadeded >>: ' + SalesforceInteractions);
     SalesforceInteractions.setLoggingLevel('debug');
 
     SalesforceInteractions.Personalization.Config.initialize({
@@ -25,7 +18,7 @@ window.onload = function() {
                       image: { defaultValue: '[Image_URL__c]' }
                   },
                   transformerTypeDetails: {
-                      html:
+                      html: 
                             `<section class="related-products">
                                 {{#if (subVar 'recs')}}
                                     <h2>{{subVar 'blocktitle'}}</h2>
@@ -59,7 +52,7 @@ window.onload = function() {
                                     </div>
                                 {{/if}}
                             </section>`
-
+                        
                 }
             }
         ],
@@ -171,7 +164,7 @@ window.onload = function() {
             dataspace: "default",
         }
     }).then(() => {
-        console.log('Interactions WebSDK initialized');
+        console.log('Interactions WebSDK initialized>>>');
     }).then(() => {
         var config = {
             global: {
@@ -221,7 +214,7 @@ window.onload = function() {
                                 description: getProductDescription(),
                                 name: getProductTitle(),
                                 sourcePageSubtype: 'Home'
-
+                              
                             }
                         }
                     }
@@ -247,10 +240,10 @@ window.onload = function() {
                 //track homepage views
                 {
                     name: "homepage",
-                    isMatch: () => /^\/$/.test(window.location.pathname) || window.location.pathname === "/b0xqymni1uo",
+                    isMatch: () => /^\/$/.test(window.location.pathname) || window.location.pathname === "/b0xqymni1uo", 
                     interaction: {
                         name: "Homepage View",
-                        eventType: "PageView",
+                        eventType: "PageView", 
                     }
                 },
                 {
@@ -321,7 +314,7 @@ birthdate: inputs["birthdate"].value,
                 }
             }
         });
-    /* Contact Point Email event */
+    /* Contact Point Email Event */
     SalesforceInteractions.sendEvent({
         user: {
             attributes: {
@@ -330,7 +323,7 @@ birthdate: inputs["birthdate"].value,
             }
         }
     });
-   /* Contact Point Email event */
+   /* Contact Point Email Event */
     SalesforceInteractions.sendEvent({
         user: {
             attributes: {
@@ -339,7 +332,7 @@ birthdate: inputs["birthdate"].value,
             }
         }
     });
-    /* Party Id event */
+    /* Party Id Event */
     SalesforceInteractions.sendEvent({
         user: {
             attributes: {
@@ -373,7 +366,7 @@ window.submitSimplePopup = function() {
     // 1. Get Email
     var emailInput = document.getElementById("dc-email");
     if (!emailInput) return;
-
+    
     var email = emailInput.value;
 
     // 2. Validation
@@ -429,18 +422,18 @@ window.submitSimplePopup = function() {
 // ----------------------------
 
   window.addEventListener("DOMContentLoaded", () => {
-    // SHARED POPUP CONFIG
-    // immediate = WPM shows it (desktop exit-intent), JS only fires events.
+    // ─── SHARED POPUP CONFIG ───────────────────────────────────────────────────
+    // immediate = WPM shows it (desktop exit-intent) → JS only fires events.
     // gated     = mobile/tablet + inactivity, JS reveals it.
     var SP_POPUPS = [
-      { id: 'sp-campaign',        mode: 'immediate' },   // desktop - WPM handles exit-intent
-      { id: 'sp-campaign-mobile', mode: 'gated'     }    // mobile  - JS handles inactivity
+      { id: 'sp-campaign',        mode: 'immediate' },   // desktop — WPM handles exit-intent
+      { id: 'sp-campaign-mobile', mode: 'gated'     }    // mobile  — JS handles inactivity
     ];
     var SP_POPUP_IDS = SP_POPUPS.map(function (p) { return p.id; });
 
     var INACTIVITY_MS = 5000;     // idle time for mobile (set 30000 for prod)
 
-    // Dedup guards - each campaign fires each event at most once
+    // Dedup guards — each campaign fires each event at most once
     var viewedSent = {}, clickedSent = {}, dismissedSent = {};
 
     function isMobileOrTablet() {
@@ -472,7 +465,7 @@ window.submitSimplePopup = function() {
 
     // Mobile gated: mobile/tablet only + inactivity, then reveal + fire Viewed
     function initGatedPopup(overlay) {
-      if (!isMobileOrTablet()) { overlay.remove(); return; }   // desktop - remove, no event
+      if (!isMobileOrTablet()) { overlay.remove(); return; }   // desktop → remove, no event
       var timer;
       var events = ["mousemove", "keydown", "scroll", "touchstart", "click"];
       function show() {
@@ -492,12 +485,12 @@ window.submitSimplePopup = function() {
       if (cfg.mode === 'gated') {
         initGatedPopup(overlay);
       } else {
-        // immediate: WPM already shows it (exit-intent), just fire Viewed once
+        // immediate: WPM already shows it (exit-intent) → just fire Viewed once
         sendViewed(overlay.getAttribute('data-name') || overlay.id);
       }
     }
 
-    // OBSERVER: watches for either popup being injected (each handled once)
+    // ─── OBSERVER: watches for either popup being injected (each handled once) ──
     // No timeout/early-disconnect: exit-intent can inject anytime the user leaves.
     // The `handled` + `viewedSent` guards keep every event firing exactly once.
     var handled = {};
@@ -520,7 +513,7 @@ window.submitSimplePopup = function() {
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
-    // CLICK: first meaningful click per popup (ignores close button)
+    // ─── CLICK: first meaningful click per popup (ignores close button) ─────────
     document.addEventListener("click", function (event) {
       if (event.target.closest('#dc-close-btn')) return;   // close = dismiss, not click
       for (var i = 0; i < SP_POPUP_IDS.length; i++) {
@@ -529,7 +522,7 @@ window.submitSimplePopup = function() {
       }
     });
 
-    // DISMISS: hide popup + fire Dismissed once
+    // ─── DISMISS: hide popup + fire Dismissed once ──────────────────────────────
     window.spDismissPopup = function (personalizationPointName) {
       SP_POPUP_IDS.forEach(function (id) {
         var overlay = document.getElementById(id);
@@ -554,9 +547,9 @@ function getPageName() {
 
     // On nettoie et transforme chaque segment
     const cleanedSegments = segments.map(segment => {
-        // Enleve l'extension .html si presente
+        // Enlève l'extension .html si présente
         const withoutExt = segment.replace('.html', '');
-        // Convertit en camelCase et enleve les caracteres non-alphanumeriques
+        // Convertit en camelCase et enlève les caractères non-alphanumériques
         return withoutExt
             .split(/[^a-zA-Z0-9]+/)
             .map((word, index) => {
@@ -570,7 +563,7 @@ function getPageName() {
             .join('');
     });
 
-    // Join avec des underscores et limite a 80 caracteres
+    // Join avec des underscores et limite à 80 caractères
     return cleanedSegments.join('_').slice(0, 80);
 }
 
