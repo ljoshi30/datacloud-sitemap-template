@@ -1,0 +1,65 @@
+name: sitemap-auto-capture
+
+# AUTO-CAPTURE MODE
+# Every day, fetch the sitemap LIVE in Data Cloud (via the beacon CDN). If it
+# differs from what's in Git — i.e. someone edited directly in the Data Cloud UI
+# — automatically commit the live version as a dated snapshot and push it.
+#
+# This guarantees version history + backup + a diff EVEN for changes made
+# outside Git. It cannot record WHO or WHY (Data Cloud doesn't capture that for
+# UI edits), so the commit is attributed to a bot and labelled as an
+# out-of-band capture. Changes made through the normal PR flow already carry
+# who/why and won't trigger this.
+#
+# SETUP: define repo secret SITEMAP_CDN_URL (the beacon bundle URL).
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # daily at 06:00 UTC
+  workflow_dispatch: {} # allow manual runs
+
+permissions:
+  contents: write # needed to push the auto-capture commit
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch live sitemap and capture if changed
+        id: capture
+        env:
+          SITEMAP_CDN_URL: ${{ secrets.SITEMAP_CDN_URL }}
+        run: |
+          node scripts/capture-live.mjs | tee capture.log
+          # surface the CAPTURED_CHANGE flag to later steps
+          grep '^CAPTURED_CHANGE=' capture.log | tail -1 >> "$GITHUB_OUTPUT"
+          rm -f capture.log
+
+      - name: Commit and push the dated snapshot
+        if: steps.capture.outputs.CAPTURED_CHANGE == 'true'
+        run: |
+          git config user.name  "datacloud-sitemap-bot"
+          git config user.email "datacloud-sitemap-bot@users.noreply.github.com"
+          DATE="$(date -u +%Y-%m-%d)"
+          git add build/sitemap.js
+          git commit -m "Auto-capture: live sitemap changed on ${DATE}
+
+          Captured directly from the Data Cloud beacon CDN because the live
+          sitemap no longer matched Git. This reflects an edit made in the
+          Data Cloud UI (outside the normal PR flow).
+
+          NOTE: Data Cloud does not record who made UI edits or why, so this
+          snapshot preserves WHAT changed and WHEN, but not WHO/WHY. See the
+          diff of this commit for the exact change."
+          git tag -f "capture-${DATE}"
+          git push origin HEAD
+          git push -f origin "capture-${DATE}"
+
+      - name: Report no change
+        if: steps.capture.outputs.CAPTURED_CHANGE != 'true'
+        run: echo "Live sitemap matches Git — nothing to capture."

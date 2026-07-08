@@ -133,6 +133,34 @@ Then split `build/sitemap.js` back into `src/` modules and rebuild.
 **Run on a schedule:** `.github/workflows/drift.yml` runs daily. Set repo secrets
 `SITEMAP_CDN_URL` and (optionally) `ALERT_WEBHOOK` for Slack/Teams alerts.
 
+## Two ways to handle direct (UI) edits — pick one
+
+People *can* edit the sitemap directly in the Data Cloud UI (it's faster — events
+flow instantly). There's no API to prevent it. You choose how the automation
+reacts when it detects a live version that doesn't match Git:
+
+| Mode | Workflow | On a direct UI edit… |
+|---|---|---|
+| **Alert** | `drift.yml` | Fails the job + Slack alert. You reconcile manually. Use when the rule is "Git only, no exceptions." |
+| **Auto-capture** | `capture.yml` | **Automatically commits the live version to Git** as a dated snapshot (`capture-YYYY-MM-DD`). Zero effort; you always keep history + backup + diff. |
+
+Most teams enable **auto-capture** — it means you get versioning no matter how
+people work. Enable one workflow (delete or disable the other) so they don't both
+act on the same change.
+
+### What auto-capture can and cannot record
+
+- ✅ **WHAT** changed (the commit diff) and **WHEN** — always.
+- ❌ **WHO** and **WHY** — *not for UI edits*. Data Cloud doesn't record the author
+  of a UI edit, so no tool can recover it. The capture commit is attributed to a
+  bot and labelled as an out-of-band change.
+- Changes made through the normal **PR flow** carry full who/why/review — this
+  only backfills the ones that bypassed Git.
+
+Recommended pattern: iterate fast directly in Data Cloud when experimenting
+(auto-capture keeps you safe), but make permanent/important changes through a PR
+so the who/why/review is on record.
+
 ### Caveats (important)
 
 - The CDN URL is an **undocumented endpoint** — best-effort monitoring, not a

@@ -50,88 +50,24 @@
 
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
+import { DEFAULT_MARKER, extractSitemap, normalize, fetchBundle } from './lib/extract.mjs';
 
 const CDN_URL = process.env.SITEMAP_CDN_URL;
 const LOCAL_PATH = process.env.LOCAL_SITEMAP ?? 'build/sitemap.js';
-const MARKER = process.env.SITEMAP_MARKER ?? '// SITEMAP AND INIT';
+const MARKER = process.env.SITEMAP_MARKER ?? DEFAULT_MARKER;
 const ALERT_WEBHOOK = process.env.ALERT_WEBHOOK;
 const USER_AGENT = process.env.USER_AGENT ?? 'datacloud-sitemap-drift-check/1.0';
 const DUMP_LIVE = process.env.DUMP_LIVE;
 
-/**
- * Normalize before comparison. The CDN may serve a minified / whitespace-
- * mangled variant of what you pasted, so a raw byte compare produces false
- * positives. We strip comments and collapse insignificant whitespace to compare
- * the *meaningful* content. Tune this to match how your build emits the file.
- *
- * NOTE: this is a heuristic normalizer, not a JS parser. If your sitemap embeds
- * comment-like or whitespace-significant string literals, consider comparing a
- * canonical build artifact on both sides instead (see README "Reducing false
- * positives").
- */
-function normalize(source) {
-  return source
-    .replace(/\/\*[\s\S]*?\*\//g, '') // block comments
-    .replace(/(^|[^:])\/\/.*$/gm, '$1') // line comments (naive; skips http://)
-    .replace(/\s+/g, ' ') // collapse whitespace runs
-    .trim();
-}
+// extractSitemap() and normalize() are shared with capture-live.mjs — see
+// scripts/lib/extract.mjs for the documented beacon-bundle handling.
 
 function sha256(text) {
   return createHash('sha256').update(text, 'utf8').digest('hex');
 }
 
-/**
- * Extract just the customer sitemap from the concatenated CDN bundle.
- *
- * The bundle is:  [ minified SDK ] + MARKER + [ beacon-wrapped sitemap ].
- * The beacon does NOT serve your uploaded file verbatim — it WRAPS it:
- *
- *   // SITEMAP AND INIT
- *   try {
- *     (function () {
- *         <-- your uploaded sitemap.js goes here (re-indented) -->
- *     })()
- *   } catch (e) { console.error("[Salesforce Data Cloud] Error loading sitemap:", e); }
- *
- * You commit the UPLOADED file (no wrapper), so we strip the marker + try/IIFE
- * prefix and the })()/catch suffix, leaving just the content you actually
- * uploaded. Without this, every run would false-positive as "drift" because the
- * committed file lacks the wrapper the CDN adds. (Whitespace/indent differences
- * are already erased by normalize(), so we only need to remove the wrapper text,
- * not match its exact formatting.)
- *
- * Returns null if the marker is absent (SDK-only bundle, sitemap not deployed,
- * or Salesforce changed the marker) so the caller can fail loudly rather than
- * diff the entire 400KB+ SDK.
- */
-function extractSitemap(bundle) {
-  const idx = bundle.indexOf(MARKER);
-  if (idx === -1) return null;
-  let body = bundle.slice(idx + MARKER.length);
-
-  // Strip the leading  try { (function () {  wrapper the beacon adds.
-  // Tolerant of whitespace variations between the tokens.
-  const prefix = /^\s*try\s*\{\s*\(function\s*\(\)\s*\{/;
-  const m = body.match(prefix);
-  if (m) {
-    body = body.slice(m[0].length);
-    // Strip the trailing  })() } catch (e) { ... }  wrapper.
-    const suffix = body.lastIndexOf('})()');
-    if (suffix !== -1) body = body.slice(0, suffix);
-  }
-  return body.trim();
-}
-
 async function fetchLiveSitemap(url) {
-  const res = await fetch(url, {
-    headers: { 'User-Agent': USER_AGENT, 'Cache-Control': 'no-cache' },
-    redirect: 'follow',
-  });
-  if (!res.ok) {
-    throw new Error(`CDN fetch failed: HTTP ${res.status} ${res.statusText}`);
-  }
-  return res.text();
+  return fetchBundle(url, USER_AGENT);
 }
 
 async function postAlert(message) {
@@ -166,7 +102,7 @@ async function main() {
     fail(2, `ERROR: ${err.message}`);
   }
 
-  const liveRaw = extractSitemap(bundle);
+  const liveRaw = extractSitemap(bundle, MARKER);
   if (liveRaw === null) {
     fail(
       2,
