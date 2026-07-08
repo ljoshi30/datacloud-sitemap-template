@@ -44,7 +44,7 @@ scripts/
 
 ## Everyday workflow
 
-1. Edit modules under `src/` (use the [Interactions SDK Launcher Chrome extension](https://chromewebstore.google.com/detail/salesforce-interactions-s/mhmpepeohaddbhkhecaldflljggicedf) Sitemap Editor to author/test on the live site).
+1. Edit the sitemap under `src/`.
 2. `npm run build` → regenerates `build/sitemap.js`.
 3. `npm run validate` → structural sanity check.
 4. Commit both `src/` and `build/sitemap.js`, open a PR. CI enforces that the
@@ -80,8 +80,12 @@ Because deploy is manual, someone *can* still edit in the UI. There is no read A
 either — but the saved sitemap is served over the **c360a beacon CDN** appended to
 the SDK bundle, so we fetch that, extract the sitemap portion, and diff it.
 
-**Find your CDN URL:** load your site with the SDK, open DevTools → Network, find
-the `c360a.min.js` request, copy its URL. It looks like:
+**Find your CDN URL (from Data Cloud Setup):**
+1. Go to **Data Cloud Setup** and search for **Website and Mobile App Connections**.
+2. Open the relevant connection.
+3. Find the **Integration Guide** section and copy the script code / CDN script.
+
+The URL you want looks like:
 ```
 https://cdn.c360a.salesforce.com/beacon/c360a/<beacon-id>/scripts/c360a.min.js
 ```
