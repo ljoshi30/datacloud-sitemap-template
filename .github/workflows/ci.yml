@@ -1,0 +1,31 @@
+name: sitemap-ci
+
+# Runs on every PR/push: builds the modular source into build/sitemap.js and
+# validates it. This guarantees the committed artifact is always the exact
+# output of the source, which is what drift detection relies on.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build sitemap
+        run: npm run build
+      - name: Validate sitemap
+        run: npm run validate
+      - name: Ensure build/sitemap.js is committed and up to date
+        # If the built file differs from what's committed, the PR author forgot
+        # to commit the rebuild. Fail so the repo artifact never lies.
+        run: |
+          if ! git diff --exit-code build/sitemap.js; then
+            echo "::error::build/sitemap.js is out of date. Run 'npm run build' and commit the result."
+            exit 1
+          fi

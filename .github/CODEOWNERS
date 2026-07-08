@@ -1,0 +1,7 @@
+# Required reviewers for sitemap changes. Editing the sitemap changes what data
+# is captured from the website, so every change needs review by the owning team.
+# Replace with your team handle(s).
+
+*                 @your-org/data-cloud-team
+/src/shared/      @your-org/data-cloud-platform
+/scripts/         @your-org/data-cloud-platform

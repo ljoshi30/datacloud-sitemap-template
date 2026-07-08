@@ -1,0 +1,30 @@
+name: sitemap-drift-check
+
+# Scheduled drift detection. Fetches the live sitemap from the CDN and diffs it
+# against build/sitemap.js on main. Fails (and alerts) if someone edited the
+# sitemap directly in the Data Cloud UI, bypassing Git.
+#
+# SETUP: define these repo secrets/variables:
+#   secrets.SITEMAP_CDN_URL   the CDN URL serving your deployed sitemap
+#   secrets.ALERT_WEBHOOK     (optional) Slack/Teams incoming webhook
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # daily at 06:00 UTC
+  workflow_dispatch: {} # allow manual runs
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build current artifact
+        run: npm run build
+      - name: Check for drift
+        env:
+          SITEMAP_CDN_URL: ${{ secrets.SITEMAP_CDN_URL }}
+          ALERT_WEBHOOK: ${{ secrets.ALERT_WEBHOOK }}
+        run: npm run drift-check

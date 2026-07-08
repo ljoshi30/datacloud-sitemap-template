@@ -1,0 +1,17 @@
+{
+  "name": "datacloud-sitemap-template",
+  "version": "1.0.0",
+  "description": "Version-controlled Web SDK sitemap for Data Cloud website connectors, with build, validation, and drift detection.",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "validate": "node scripts/validate.mjs",
+    "drift-check": "node scripts/drift-check.mjs",
+    "ci": "npm run build && npm run validate"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}

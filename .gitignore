@@ -1,0 +1,7 @@
+node_modules/
+*.log
+.DS_Store
+
+# NOTE: build/sitemap.js is intentionally NOT ignored. It is committed so it can
+# serve as the source of truth that drift-check.mjs compares the live CDN
+# artifact against, and so reviewers can diff the actual deployed output.
