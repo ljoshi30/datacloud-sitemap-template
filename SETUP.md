@@ -7,6 +7,15 @@ rollback, and daily auto-capture of any direct Data Cloud edits.
 There are two phases: **(A)** make a copy of the template, then **(B)** point it
 at the new project's Data Cloud.
 
+> **Fast path:** if you have the template cloned locally (with Node.js 18+
+> installed), the helper script does the local steps (copy + seed + first
+> commit) for you:
+> ```bash
+> ./scripts/setup-new-project.sh <project-name> "<cdn-url>" <github-user>
+> ```
+> It then prints the remaining browser steps (create repo, push, add secret).
+> The manual steps below are the same thing done by hand.
+
 ---
 
 ## Phase A — Create the new project's repo
